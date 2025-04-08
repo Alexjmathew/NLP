@@ -1,0 +1,62 @@
+import pandas as pd
+import re
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.model_selection import train_test_split
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+import nltk
+
+# Download required NLTK data
+nltk.download('stopwords')
+
+# Load dataset
+data = pd.read_csv('IMDB Dataset.csv')  # Replace with your file path
+
+# Preprocessing function
+def preprocess_text(text):
+    # Convert to lowercase
+    text = text.lower()
+    # Remove HTML tags
+    text = re.sub(r'<.*?>', '', text)
+    # Remove special characters and numbers
+    text = re.sub(r'[^a-zA-Z\s]', '', text)
+    # Tokenize and remove stopwords
+    stop_words = set(stopwords.words('english'))
+    stemmer = PorterStemmer()
+    words = [stemmer.stem(word) for word in text.split() if word not in stop_words]
+    return ' '.join(words)
+
+# Apply preprocessing
+data['cleaned_review'] = data['review'].apply(preprocess_text)
+
+# Convert sentiment to numerical (0 for negative, 1 for positive)
+data['sentiment'] = data['sentiment'].map({'negative':0, 'positive':1})
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    data['cleaned_review'], 
+    data['sentiment'], 
+    test_size=0.2, 
+    random_state=42
+)
+
+# TF-IDF Vectorization
+tfidf = TfidfVectorizer(max_features=5000)
+X_train_tfidf = tfidf.fit_transform(X_train)
+X_test_tfidf = tfidf.transform(X_test)
+
+# Train Naive Bayes classifier
+nb_classifier = MultinomialNB()
+nb_classifier.fit(X_train_tfidf, y_train)
+
+# Evaluate
+accuracy = nb_classifier.score(X_test_tfidf, y_test)
+print(f"Model Accuracy: {accuracy:.2f}")
+
+# Predict on new text
+sample_review = "This movie was absolutely fantastic! The acting was superb and the plot was engaging."
+cleaned_sample = preprocess_text(sample_review)
+sample_tfidf = tfidf.transform([cleaned_sample])
+prediction = nb_classifier.predict(sample_tfidf)[0]
+print(f"Predicted Sentiment: {'Positive' if prediction == 1 else 'Negative'}")
