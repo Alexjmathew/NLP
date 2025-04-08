@@ -1,0 +1,74 @@
+import pandas as pd
+import re
+from nltk.translate import AlignedSent, IBMModel1
+from nltk.tokenize import word_tokenize
+import nltk
+
+# Download required NLTK data
+nltk.download('punkt')
+
+# Load dataset (example format: CSV with 'english' and 'spanish' columns)
+def load_data(filepath):
+    try:
+        data = pd.read_csv(filepath)
+        return data['english'].tolist(), data['spanish'].tolist()
+    except FileNotFoundError:
+        print("Error: File not found. Using sample data instead.")
+        # Sample data if file not found
+        english = ["this is a house", "the cat sleeps", "i love python"]
+        spanish = ["esta es una casa", "el gato duerme", "me encanta python"]
+        return english, spanish
+
+# Text cleaning
+def clean_text(sentences):
+    cleaned = []
+    for sent in sentences:
+        sent = sent.lower()
+        sent = re.sub(r'[^\w\s]', '', sent)
+        cleaned.append(sent)
+    return cleaned
+
+# Prepare aligned sentences for training
+def prepare_aligned_data(eng, esp):
+    return [AlignedSent(eng_sent.split(), esp_sent.split()) 
+            for eng_sent, esp_sent in zip(eng, esp)]
+
+# Main translation function
+def translate_sentence(model, sentence):
+    tokens = word_tokenize(sentence.lower())
+    translated = []
+    for word in tokens:
+        # Get most probable translation
+        if word in model.translation_table:
+            translations = model.translation_table[word]
+            best_trans = max(translations.items(), key=lambda x: x[1])[0]
+            translated.append(best_trans)
+        else:
+            translated.append(word)  # Keep unknown words as-is
+    return ' '.join(translated)
+
+# Main execution
+def main():
+    # Load and prepare data
+    eng, esp = load_data('eng_spa.csv')
+    eng_clean = clean_text(eng)
+    esp_clean = clean_text(esp)
+    
+    # Train model
+    aligned_sents = prepare_aligned_data(eng_clean, esp_clean)
+    ibm1 = IBMModel1(aligned_sents, 10)  # 10 iterations
+    
+    # Interactive translation
+    print("Language Translator (English to Spanish)")
+    print("Type 'quit' to exit\n")
+    
+    while True:
+        text = input("Enter English text: ")
+        if text.lower() in ['quit', 'exit']:
+            break
+        
+        translation = translate_sentence(ibm1, text)
+        print(f"Translation: {translation}\n")
+
+if __name__ == "__main__":
+    main()
