@@ -1,0 +1,99 @@
+Experiment 9: Document Similarity using TF-IDF and Cosine Similarity
+
+    Data Preparation:
+
+        Create a corpus of documents
+
+        Preprocess text (tokenization, lowercase, remove punctuation)
+
+    Feature Extraction:
+
+        Compute TF-IDF vectors for all documents
+
+        TF (Term Frequency): Frequency of terms in each document
+
+        IDF (Inverse Document Frequency): Importance of terms across corpus
+
+    Query Processing:
+
+        Transform query into TF-IDF vector using same vocabulary
+
+    Similarity Calculation:
+
+        Compute cosine similarity between query vector and all document vectors
+
+        Rank documents by similarity score
+
+    Result Presentation:
+
+        Return most similar document with similarity score
+
+
+
+
+
+import pandas as pd
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+import string
+
+nltk.download('punkt')
+nltk.download('stopwords')
+
+# Sample corpus
+documents = [
+    "Machine learning is the study of computer algorithms that improve automatically through experience.",
+    "Artificial intelligence is the simulation of human intelligence processes by machines.",
+    "Python is an interpreted high-level programming language for general-purpose programming.",
+    "Deep learning is part of a broader family of machine learning methods based on artificial neural networks.",
+    "Natural language processing is a subfield of linguistics, computer science, and artificial intelligence."
+]
+
+# Preprocessing function
+def preprocess(text):
+    # Lowercase
+    text = text.lower()
+    # Remove punctuation
+    text = text.translate(str.maketrans('', '', string.punctuation))
+    # Tokenize and remove stopwords
+    tokens = word_tokenize(text)
+    stop_words = set(stopwords.words('english'))
+    tokens = [word for word in tokens if word not in stop_words]
+    return ' '.join(tokens)
+
+# Preprocess all documents
+processed_docs = [preprocess(doc) for doc in documents]
+
+# Create TF-IDF vectorizer
+vectorizer = TfidfVectorizer()
+tfidf_matrix = vectorizer.fit_transform(processed_docs)
+
+def find_most_similar(query):
+    # Preprocess query
+    processed_query = preprocess(query)
+    
+    # Transform query to TF-IDF vector
+    query_vector = vectorizer.transform([processed_query])
+    
+    # Calculate cosine similarities
+    similarities = cosine_similarity(query_vector, tfidf_matrix)
+    
+    # Get most similar document
+    most_similar_idx = np.argmax(similarities)
+    similarity_score = similarities[0][most_similar_idx]
+    most_similar_doc = documents[most_similar_idx]
+    
+    return most_similar_doc, similarity_score
+
+# Example usage
+query = "AI and machine intelligence"
+similar_doc, score = find_most_similar(query)
+
+print("Query:", query)
+print("\nMost similar document:")
+print(similar_doc)
+print(f"\nSimilarity score: {score:.4f}")
