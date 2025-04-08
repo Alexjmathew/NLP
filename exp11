@@ -1,0 +1,54 @@
+Experiment 11: Building a Basic Chatbot using Python
+
+import re
+import random
+from nltk.chat.util import Chat, reflections
+
+# Define response pairs
+pairs = [
+    [
+        r"my name is (.*)",
+        ["Hello %1! How can I help you today?",]
+    ],
+    [
+        r"what is your name?",
+        ["I'm ChatBot 1.0. Just here to chat!",]
+    ],
+    [
+        r"how are you ?",
+        ["I'm functioning optimally, thank you!", "All systems go! How about you?",]
+    ],
+    [
+        r"(hi|hello|hey|hola|greetings)",
+        ["Hello there!", "Hi human!", "Greetings!",]
+    ],
+    [
+        r"(.*) (location|city) ?",
+        ["I exist in the digital realm, so everywhere and nowhere!",]
+    ],
+    [
+        r"(.*) created you ?",
+        ["I was created by a brilliant AI student for Experiment 11!",]
+    ],
+    [
+        r"quit|bye|exit|goodbye",
+        ["Goodbye! It was nice chatting.", "See you later!", "Bye! Come back soon."]
+    ],
+    [
+        r"(.*)",
+        ["I didn't quite get that. Could you rephrase?", 
+         "Interesting! Tell me more.",
+         "I'm still learning. Ask me something else!"]
+    ]
+]
+
+# Create chatbot
+chatbot = Chat(pairs, reflections)
+
+# Start conversation
+def chat():
+    print("ChatBot 1.0: Hi! I'm your basic chatbot. Type 'quit' to exit.")
+    chatbot.converse()
+
+if __name__ == "__main__":
+    chat()
