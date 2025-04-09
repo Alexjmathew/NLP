@@ -1,0 +1,46 @@
+import pandas as pd
+import numpy as np
+import nltk
+
+nltk.download('punkt')
+
+corpus = ['data science is one of the most important fields of science',
+          'this is one of the best data science courses',
+          'data scientists analyze data']
+
+words_set = set()
+
+for doc in corpus:
+    words = nltk.word_tokenize(doc.lower())
+    words_set = words_set.union(set(words))
+
+n_docs = len(corpus)
+n_words_set = len(words_set)
+
+df_tf = pd.DataFrame(np.zeros((n_docs, n_words_set)), columns=list(words_set))
+
+for i in range(n_docs):
+    words = nltk.word_tokenize(corpus[i].lower())
+    for w in words:
+        df_tf[w][i] = df_tf[w][i] + (words.count(w) / len(words))
+
+print(df_tf)
+
+print("IDF of: ")
+
+idf = {}
+
+for w in words_set:
+    k = 0
+    for i in range(n_docs):
+        if w in nltk.word_tokenize(corpus[i].lower()):
+            k += 1
+    idf[w] = np.log10(n_docs / k)
+    print(w, " : ", idf[w])
+
+df_tf_idf = df_tf.copy()
+for w in words_set:
+    for i in range(n_docs):
+        df_tf_idf[w][i] = df_tf[w][i] * idf[w]
+
+print(df_tf_idf)
