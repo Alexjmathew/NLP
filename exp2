@@ -1,0 +1,8 @@
+import nltk
+from nltk.corpus import gutenberg
+from nltk.text import Text
+
+nltk.download('gutenberg')
+text1 = gutenberg.words('melville-moby_dick.txt')
+text2 = Text(text1)
+concordance = text2.concordance('freedom', width=70)
