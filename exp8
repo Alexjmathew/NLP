@@ -1,0 +1,7 @@
+from nltk import pos_tag, ne_chunk
+from nltk.tokenize import word_tokenize
+
+text = "GeeksforGeeks is in India."
+words = word_tokenize(text)
+tags = pos_tag(words)
+ner = ne_chunk(tags)
