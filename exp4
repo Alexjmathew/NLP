@@ -1,0 +1,39 @@
+import nltk
+from nltk.corpus import stopwords, wordnet
+from nltk.stem import PorterStemmer, WordNetLemmatizer
+text = "This is a sample text to demonstrate text preprocessing techniques."
+tokens = nltk.word_tokenize(text)
+print("Tokenized words:", tokens)
+stop_words = set(stopwords.words('english'))
+stop_removed = [word for word in tokens if word.lower() not in stop_words]
+print("Built-in stop words removed:", stop_removed)
+custom_stop = {"text", "sample"}
+stop_words.update(custom_stop)
+stop_removed_new = [word for word in tokens if word.lower() not in stop_words]
+print("Custom stop words removed:", stop_removed_new)
+
+stemmer = PorterStemmer()
+stem_removed = [stemmer.stem(word) for word in stop_removed_new]
+print("Stemmed words:", stem_removed)
+
+text2 = "Running is fun and playing games is enjoyable."
+tokens2 = nltk.word_tokenize(text2)
+pos_tags = nltk.pos_tag(tokens2)
+lemmatizer = WordNetLemmatizer()
+
+def get_wordnet_pos(tag):
+    if tag.startswith('V'):
+        return wordnet.VERB
+    elif tag.startswith('N'):
+        return wordnet.NOUN
+    elif tag.startswith('J'):
+        return wordnet.ADJ
+    elif tag.startswith('R'):
+        return wordnet.ADV
+    else:
+        return wordnet.NOUN  # Default to noun
+
+lemmatized_words = [lemmatizer.lemmatize(word, get_wordnet_pos(tag)) for word, tag in pos_tags]
+
+print(f"Original text: {text2}")
+print(f"Lemmatized text: {' '.join(lemmatized_words)}")
